@@ -1,0 +1,270 @@
+<apex:page docType="html-5.0" standardController="i360__Appointment__c" extensions="i360.MobileAppointmentDetailsController" showHeader="false" sidebar="false" standardstylesheets="false">
+<c:MobileHeader /> 
+
+<div data-role="page" style="overflow:auto;" id="pageDiv">
+	<script type="text/javascript">
+		j$("[id$=pageDiv]").on(
+			"pagebeforecreate",
+			function( event, ui ) {
+				attachEventHandlers();
+			}
+		);
+	</script>
+    <div data-role="header" id="headerDiv" >
+    	<a href="#" data-icon="arrow-l" data-rel="back" class="backKey backButton">Back</a>
+    	<h1>Appointment</h1>
+    	<a href="#" data-icon="home" class="homeButton backKey">Menu</a>
+    </div><!-- /header -->
+    
+    <div data-role="content" id="contentDiv" style="overflow:auto;">
+    <ul class="ui-listview" data-role="listview">
+            <li data-role="list-divider" role="heading">
+                '{!Appointment__c.Type__c}' Appointment: <apex:outputText escape="false" rendered="{!IsBlank(i360__Appointment__c.i360__Result__c)}"><span style="">&nbsp;{!Appointment__c.Appointment_Status__c}</span></apex:outputText><apex:outputText escape="false" rendered="{!!IsBlank(i360__Appointment__c.i360__Result__c)}"><span style="">&nbsp;{!Appointment__c.Result__c}</span></apex:outputText>
+            </li>
+            <li><h3>Time</h3> 
+                <p>{!FormattedDate}</p>
+                <p>{!FormattedTime}</p>
+            </li>
+            <li>
+            	<a onclick="j$.mobile.showPageLoadingMsg();window.location='{!$Page.Mobile_ProspectDetails}?id={!Appointment__c.Prospect__c}';return false;" href="{!$Page.Mobile_ProspectDetails}?id={!Appointment__c.Prospect__c}">
+                <h4>Prospect</h4>
+                <p>{!if(Appointment__c.Prospect__r.Primary_Salutation__c != null,Appointment__c.Prospect__r.Primary_Salutation__c + ' ','')}{!Appointment__c.Prospect__r.Primary_First_Name__c} {!Appointment__c.Prospect__r.Primary_Last_Name__c}</p>
+                <p style="{!if(Appointment__c.Prospect__r.Secondary_First_Name__c != null || Appointment__c.Prospect__r.Secondary_Last_Name__c != null,'','display:none')}">
+                   {!if(Appointment__c.Prospect__r.Secondary_Salutation__c != null,Appointment__c.Prospect__r.Secondary_Salutation__c + ' ','')}{!Appointment__c.Prospect__r.Secondary_First_Name__c} {!Appointment__c.Prospect__r.Secondary_Last_Name__c} {!if(Appointment__c.Prospect__r.Relationship_To_Primary__c !=null,'('+ Appointment__c.Prospect__r.Relationship_To_Primary__c+')','')}
+                </p>
+                </a>
+            </li>
+            <li>
+                <a id="navigate" href="{!HTMLENCODE(Appointment__c.LocationLink__c)}" rel="external" onclick="document.location.href = '{!HTMLENCODE(Appointment__c.LocationLink__c)}';return false;">
+                <h4>Address</h4>
+                <p>
+                {!Appointment__c.Address__c}<br/> 
+                {!Appointment__c.City__c}, {!Appointment__c.State__c} {!Appointment__c.Zip__c}
+                </p>
+                </a> 
+            </li>
+            <li style="">
+            	<a id="mailLink" href="mailto://{!Appointment__c.Prospect__r.Primary_Email__c}">
+            	<h4>Email</h4>
+            	<p>{!if(ISBLANK(Appointment__c.Prospect__r.Primary_Email__c),'No email address on record',Appointment__c.Prospect__r.Primary_Email__c)}</p>
+            	</a>
+            </li>
+            <li class="swipePage">
+                
+                <h4>Interested In</h4>
+                <p>{!Appointment__c.Components__c}</p> 
+                <ul class="ui-listview" data-role="listview">
+                <div data-role="header" style="height:35px">
+                    <a href="#" data-icon="arrow-l" data-rel="back">Back</a>
+                </div>
+                <apex:repeat value="{!i360__Appointment__c.Interests__r}" var="interest">
+                    <li style="white-space:normal">
+                     {!interest.Component__c}
+                     <p style="white-space:normal;padding-top:5px"><b>Quantity:</b> {!interest.Quantity_Display__c}</p>
+                     <p style="white-space:normal"><b>Type:</b> {!interest.Type__c}</p>
+                     <p style="white-space:normal"><b>Color:</b> {!interest.Color__c}</p>
+                     <p style="white-space:normal"><b>Description:</b> {!interest.Description__c}</p>
+                    </li>
+                </apex:repeat>
+                </ul>
+            </li>
+            <li>
+                  <h4>Comments</h4>
+                  <p>{!if(Appointment__c.Comments__c == null || Appointment__c.Comments__c == '','None',Appointment__c.Comments__c)}</p>
+                  <ul>
+                   <div data-role="header" style="height:35px">
+                        <a href="#" data-icon="arrow-l" data-rel="back">Back</a>
+                    </div>
+                    <li>
+                        {!Appointment__c.Comments__c}
+                    </li>
+                  </ul>
+               
+            </li>
+            <li>
+                <h4>Demographics</h4>
+                <p><b>Year Home Built</b> {!Appointment__c.Year_Home_Built__c}</p>
+                <p><b>Year Home Purchased</b> {!Appointment__c.Prospect__r.Year_Home_Purchased__c}</p>
+                <p><b>Structure Type</b> {!Appointment__c.Prospect__r.Structure_Type__c}</p>
+                <p><b>Household Income</b> {!Appointment__c.Prospect__r.Household_Income__c}</p>
+                <p><b>Home Value</b> {!Appointment__c.Prospect__r.Home_Value__c}</p>
+            </li>
+                        
+            <li style="display:none"><a href="{!$Page.Mobile_CallProspect}?id={!Appointment__c.Prospect__c}"  id="callProspect" data-icon="custom">
+                <h4>Phone Numbers</h4>
+                <p style="{!if(Appointment__c.Prospect__r.Phone_1__c == null,'display:none','')}">
+                    <p><b>{!Appointment__c.Prospect__r.Phone_1_Type__c}</b>&nbsp;{!Appointment__c.Prospect__r.Phone_1__c}</p>
+                </p>
+                
+                <p style="{!if(Appointment__c.Prospect__r.Phone_2__c == null,'display:none','')}">
+                    <p><b>{!Appointment__c.Prospect__r.Phone_2_Type__c}</b>&nbsp;{!Appointment__c.Prospect__r.Phone_2__c}</p>
+                </p>
+                
+                <p style="{!if(Appointment__c.Prospect__r.Phone_3__c == null,'display:none','')}">
+                    <p><b>{!Appointment__c.Prospect__r.Phone_3_Type__c}</b>&nbsp;{!Appointment__c.Prospect__r.Phone_3__c}</p>
+                </p>
+            </a>
+            </li>
+            <li data-role="list-divider" role="heading"> 
+                Lead Source 
+            </li>
+            <li>
+                <h4>Source</h4> 
+                <p><b>Type</b> {!Appointment__c.Source__r.Type__c}</p>
+                <p><b>Name</b> {!Appointment__c.Source__r.Name}</p>
+                <p style="white-space:normal">{!Appointment__c.Source__r.Description__c}</p>
+                
+            </li>
+            <li>
+                <h4>Taken on {!FormattedTakenOn}</h4>
+                <p>
+                    by {!Appointment__c.Lead_Source__r.Taker__r.Name}<br/>
+                </p>
+            </li>
+            <apex:outputpanel layout="none" rendered="{!Quotes.size > 0}">
+            <li data-role="list-divider">Quotes</li>
+            <apex:repeat value="{!Quotes}" var="q">
+            	<li>
+            		<a href="#" id="quote_{!q.quote.id}" class="quoteItem">
+            		<p><h2>{!q.quote.Name}</h2></p>
+            		<p><b>Status:</b>&nbsp;{!q.quote.Status__c}</p>
+            		<p><b>Total:</b>&nbsp;{!q.formattedTotal}</p>
+            		<!-- <p>Time:&nbsp;{!FormattedDate(a)}&nbsp;{!FormattedTime(a)}</p> -->
+            		</a>
+            	</li>
+            </apex:repeat>
+            </apex:outputpanel>
+            
+    </ul>   
+    </div><!-- /content -->
+	
+	<!-- Footer -->
+	<div id="FooterDiv" data-role="footer" data-position="fixed" data-theme="a" data-tap-toggle="false">
+		<div data-role="navbar" class="nav-btn-icon" >
+			<ul>
+				<li><a href="#" id="edit" data-icon="custom">Edit</a></li>
+			    <li><a href="{!Appointment__c.LocationLink__c}" class="navigate" data-icon="custom">Map</a></li>
+			    <li><a href="#" id="quote" data-icon="custom">Add Quote</a></li>
+			</ul>
+		</div><div data-role="navbar" class="nav-btn-icon" >
+			<ul>
+			    <li><a href="#" id="call" data-icon="custom">Call</a></li>
+			    <li> 
+			    	<a style="{!if(IsBlank(Appointment__c.Result__c),'display:none','')}" onclick="j$.mobile.showPageLoadingMsg();" href="{!$Page.Mobile_AppointmentUnResult}?id={!Appointment__c.id}&retURL={!$Page.Mobile_AppointmentDetails}?id={!Appointment__c.id}" rel="external" id="unresult" data-icon="custom">Un-Result</a>
+			    	<a style="{!if(IsBlank(Appointment__c.Result__c),'','display:none')}" onclick="j$.mobile.showPageLoadingMsg();" href="{!$Page.Mobile_AppointmentResult}?id={!Appointment__c.id}&retURL={!$Page.Mobile_AppointmentDetails}?id={!Appointment__c.id}" rel="external" id="result" data-icon="custom">Result</a>
+			    </li>
+			    <li><a href="#"  id="picture" rel="external" data-icon="custom">Add Photo</a></li>
+		 	</ul>
+		 </div>
+	</div>
+    
+</div><!-- /page -->
+
+<script>
+
+var mapLink = "";
+var mailLink = "";
+
+function attachEventHandlers(){
+	j$('#pageDiv').on('pageshow', function() {
+		j$('#contentDiv').css('padding-top',(j$('#headerDiv').height() - 22) + 'px');
+	});
+	
+	if (mapLink == ""){
+		j$(".navigate").each(
+			function(idx){
+				//alert('Hell0');
+				mapLink = j$(this).attr("href");
+				j$(this).attr("href","#");
+			}
+		);
+	}
+	
+	if (isAndroid()){
+		var mailLink = j$("#mailLink").attr("href");
+		mailLink = mailLink.replace('//','');
+		//alert(mailLink);
+		j$("#mailLink").attr("href","#");
+		j$("#mailLink").on("click tap", function(event){
+			try{
+				event.stopPropagation();
+				event.preventDefault();
+				if (mailLink == ""){
+					alert("No email address.");
+				}else{
+					navigateToExternalUrl(mailLink);
+				}
+			}catch(ex){
+				showDebugMessage('Error in Email:'+ex.toString());
+				j$.mobile.loading('hide');
+			}
+			return false;
+		});
+		
+	}
+	
+	j$(".navigate").each(
+		function(idx){
+			j$(this).on("click tap", function(event){
+				try{
+					event.stopPropagation();
+					event.preventDefault();
+					if (mapLink == ""){
+						alert("No address to map.");
+					}else{
+						navigateToExternalUrl(mapLink);
+					}
+				}catch(ex){
+					showDebugMessage('Error in Map:'+ex.toString());
+					j$.mobile.loading('hide');
+				}
+				return false;
+			});
+		}
+	);
+	
+	j$("#edit").on("click tap", function(event){
+		event.stopPropagation();
+		j$.mobile.loading('show');
+		window.location='{!$Page.Mobile_AppointmentEdit}?id={!Appointment__c.Id}'; 
+	});
+	
+	j$("#quote").on("click tap", function(event){
+		event.stopPropagation();
+		j$.mobile.loading('show');
+		window.location='{!$Page.Mobile_QuoteEdit}?cid={!Appointment__c.Id}'; 
+	});
+	
+	j$("#call").on("click tap", function(event){
+		try{
+			event.stopPropagation();
+			j$.mobile.loading('show');
+			window.location='{!$Page.Mobile_CallProspect}?id={!JSENCODE(Appointment__c.Prospect__c)}'; 
+		}catch(ex){
+			showDebugMessage('Error in Call Prospect:'+ex.toString());
+		}
+	});
+	
+	j$("#picture").on("click tap", function(event){
+		event.stopPropagation();
+		j$.mobile.loading('show');
+		window.location='{!$Page.Mobile_UploadPicture}?id={!Appointment__c.id}'; 
+	});
+	
+	j$(".quoteItem").on("click tap", function(event){
+		event.stopPropagation();
+		j$.mobile.loading('show');
+		viewQuote(j$(this).attr("id").split("_")[1]);
+	});
+}
+	
+function goToMySchedule(){
+	window.location='{!$Page.Mobile_Agenda}';
+}
+
+function viewQuote(quoteId){
+	window.location = "/apex/mobile_quoteview?id="+quoteId;
+}
+</script>
+</apex:page>
+                       
